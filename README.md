@@ -39,6 +39,25 @@ cd ArenaCats
 ./gradlew build
 ```
 
+**Include it in your project**:
+```xml
+  <repositories>
+      <repository>
+        <id>jgj52-repo</id>
+        <url>https://maven.jgj52.hu/repository/maven-releases/</url>
+      </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>hu.jgj52</groupId>
+      <artifactId>ArenaCats</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+```
+
 **API Usage**:
 ```java
 import hu.jgj52.arenaCats.Types.*;
