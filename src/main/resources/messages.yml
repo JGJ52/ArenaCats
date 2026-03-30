@@ -1,0 +1,30 @@
+messages:
+  notPlayer: "<red>You need to be a player to execute this command!</red>"
+  noPerm: "<red>You don't have permission to run this command.</red>"
+  noArgs: "<red>Not enough args!</red>"
+  madeWaypoint: "<green>Waypoint successfully made!</green>"
+  arenaNotFound: "<red>Arena not found!</red>"
+  waypointNotFound: "<red>Waypoint not found!</red>"
+  alreadyWaypoint: "<red>There is a waypoint already existing with this name!</red>"
+  deleted: "<green>Arena deleted successfully!</green>"
+guis: # These are using the MiniMessage format
+  CreateArenaGUI:
+    name: "Create arena"
+    nameItemName: "<white>Click this to set the name of your kit</white>"
+    arenaItemName: "<white>Click this to set the arena</white>"
+    itemLoreIfSet: "<green>Set</green>"
+    itemLoreIfUnset: "<dark_red>Unset</dark_red>"
+    nameMessage: "<yellow>Type the name of the arena to chat</yellow>"
+    alreadyName: "<red>There's an arena with this name already existing!</red>"
+    noClipboard: "<red>You need to put the arena on your clipboard before quitting!</red>"
+    saveItemName: "<green>Save</green>"
+    notEverythingSet: "<red>You need to set everything before saving!</red>"
+    saved: "<green>Arena successfully saved!</green>"
+  ArenaGUI:
+    name: "Arenas"
+    iconLore: "<light_purple>Click to place it!</light_purple>"
+    createArenaItemName: "<green>Create a new one</green>"
+    previousArrow: "<white>Previous page</white>"
+    nextArrow: "<white>Next page</white>"
+arenaEditor:
+  leaveItemName: "<red>Leave</red>"
