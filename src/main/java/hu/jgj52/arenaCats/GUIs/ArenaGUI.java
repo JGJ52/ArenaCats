@@ -50,14 +50,28 @@ public class ArenaGUI extends GUI {
             slot++;
             if ((slot + 1) % 9 == 0) slot += 2;
         }
+        ItemStack outline = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta outlineMeta = outline.getItemMeta();
+        outlineMeta.setHideTooltip(true);
+        outline.setItemMeta(outlineMeta);
+
+        ItemStack inline = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta inlineMeta = inline.getItemMeta();
+        inlineMeta.setHideTooltip(true);
+        inline.setItemMeta(inlineMeta);
+        for (int i = slot; slot < 44; i++) {
+            gui.setItem(slot, inline);
+            slot++;
+            if ((slot + 1) % 9 == 0) slot += 2;
+        }
         ItemStack previous = new ItemStack(Material.ARROW);
         ItemMeta previousMeta = previous.getItemMeta();
-        previousMeta.displayName(getComponent("previousArrow"));
+        previousMeta.displayName(getComponent("previousArrow", true));
         previous.setItemMeta(previousMeta);
 
         ItemStack next = new ItemStack(Material.ARROW);
         ItemMeta nextMeta = next.getItemMeta();
-        nextMeta.displayName(getComponent("nextArrow"));
+        nextMeta.displayName(getComponent("nextArrow", true));
         next.setItemMeta(nextMeta);
 
         ItemStack create = new ItemStack(Material.BOOK);
@@ -70,9 +84,13 @@ public class ArenaGUI extends GUI {
         }
         if (page > 0) {
             gui.setItem(45, previous);
+        } else {
+            gui.setItem(45, outline);
         }
-        if (end > 28) {
+        if (list.size() > 28 && end == 28) {
             gui.setItem(53, next);
+        } else {
+            gui.setItem(53, outline);
         }
     }
 
@@ -80,15 +98,14 @@ public class ArenaGUI extends GUI {
     public void onClick(InventoryClickEvent event) {
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player player)) return;
+        ItemStack item = gui.getItem(event.getSlot());
         if (event.getSlot() == 45) {
-            if (page > 0) {
+            if (item != null && item.getType() == Material.ARROW) {
                 page--;
                 init(player);
             }
         } else if (event.getSlot() == 53) {
-            ConfigurationSection section = arenas.getConfig();
-            if (section == null) return;
-            if ((section.getKeys(false).size() - 1) / 28 > page) {
+            if (item != null && item.getType() == Material.ARROW) {
                 page++;
                 init(player);
             }

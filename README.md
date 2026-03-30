@@ -52,7 +52,7 @@ cd ArenaCats
 <dependency>
   <groupId>hu.jgj52</groupId>
   <artifactId>ArenaCats</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <scope>provided</scope>
 </dependency>
 </dependencies>
