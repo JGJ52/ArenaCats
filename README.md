@@ -1,7 +1,7 @@
 # ArenaCats
 ![Time](https://hackatime-badge.hackclub.com/U0922GMGGTU/ArenaCats?label=Time+I+spent+on+this)
 
-**You need [LibCats](https://github.com/JGJ52/LibCats) and [WorldEdit](https://modrinth.com/plugin/worldedit) for this plugin to work**
+**You need [LibCats](https://modrinth.com/plugin/libcats) and [WorldEdit](https://modrinth.com/plugin/worldedit) for this plugin to work**
 
 **Commands**:\
 There is only one command:\
