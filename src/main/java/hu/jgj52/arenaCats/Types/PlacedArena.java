@@ -8,6 +8,13 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
 import hu.jgj52.libCats.Utils.RegistryFromName;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -25,7 +32,7 @@ public class PlacedArena {
         return placedArenas.keySet();
     }
     private final World world;
-    private final List<com.sk89q.worldguard.protection.regions.ProtectedRegion> regions = new ArrayList<>();
+    private final List<ProtectedRegion> regions = new ArrayList<>();
     private final List<Waypoint> waypoints = new ArrayList<>();
     PlacedArena(Clipboard clipboard, ConfigurationSection regions, ConfigurationSection waypoints, ConfigurationSection gamerules) {
         UUID uuid = UUID.randomUUID();
@@ -84,8 +91,8 @@ public class PlacedArena {
         }
         Plugin we = Bukkit.getPluginManager().getPlugin("WorldGuard");
         if (we != null && we.isEnabled() && regions != null) {
-            com.sk89q.worldguard.protection.regions.RegionContainer container = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getRegionContainer();
-            com.sk89q.worldguard.protection.managers.RegionManager rgs = container.get(weWorld);
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionManager rgs = container.get(weWorld);
             if (rgs == null) return;
             for (String name : regions.getKeys(false)) {
                 double x1 = regions.getDouble(name + ".x1");
@@ -95,17 +102,17 @@ public class PlacedArena {
                 double y2 = regions.getDouble(name + ".y2");
                 double z2 = regions.getDouble(name + ".z2");
                 ConfigurationSection flagsSection = regions.getConfigurationSection(name + ".flags");
-                Map<com.sk89q.worldguard.protection.flags.StateFlag, com.sk89q.worldguard.protection.flags.StateFlag.State> flags = new HashMap<>();
+                Map<StateFlag, StateFlag.State> flags = new HashMap<>();
                 if (flagsSection != null) {
                     for (String n : flagsSection.getKeys(false)) {
-                        if (!(com.sk89q.worldguard.WorldGuard.getInstance().getFlagRegistry().get(n.toLowerCase()) instanceof com.sk89q.worldguard.protection.flags.StateFlag flag)) continue;
-                        com.sk89q.worldguard.protection.flags.StateFlag.State state = com.sk89q.worldguard.protection.flags.StateFlag.State.valueOf(flagsSection.getString(n));
+                        if (!(WorldGuard.getInstance().getFlagRegistry().get(n.toLowerCase()) instanceof StateFlag flag)) continue;
+                        StateFlag.State state = StateFlag.State.valueOf(flagsSection.getString(n));
                         flags.put(flag, state);
                     }
                 }
                 BlockVector3 min = BlockVector3.at(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2));
                 BlockVector3 max = BlockVector3.at(Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
-                com.sk89q.worldguard.protection.regions.ProtectedRegion region = new com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion(name, min, max);
+                ProtectedRegion region = new ProtectedCuboidRegion(name, min, max);
                 if (regions.get(name + ".priority") != null) {
                     region.setPriority(regions.getInt(name + ".priority"));
                 }
@@ -115,7 +122,7 @@ public class PlacedArena {
             }
             try {
                 rgs.save();
-            } catch (com.sk89q.worldguard.protection.managers.storage.StorageException e) {
+            } catch (StorageException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -140,7 +147,7 @@ public class PlacedArena {
         return world;
     }
 
-    public List<com.sk89q.worldguard.protection.regions.ProtectedRegion> getRegions() {
+    public List<ProtectedRegion> getRegions() {
         return regions;
     }
 
@@ -148,8 +155,8 @@ public class PlacedArena {
         return waypoints;
     }
 
-    public com.sk89q.worldguard.protection.regions.ProtectedRegion getRegion(String name) {
-        for (com.sk89q.worldguard.protection.regions.ProtectedRegion region : regions) {
+    public ProtectedRegion getRegion(String name) {
+        for (ProtectedRegion region : regions) {
             if (region.getId().equals(name)) return region;
         }
         return null;

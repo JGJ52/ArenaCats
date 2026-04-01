@@ -6,6 +6,11 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.key.Key;
@@ -56,10 +61,10 @@ public class Arena {
 
         Plugin wg = Bukkit.getPluginManager().getPlugin("WorldGuard");
         if (wg != null && wg.isEnabled()) {
-            com.sk89q.worldguard.protection.managers.RegionManager rm = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getRegionContainer().get(region.getWorld());
+            RegionManager rm = WorldGuard.getInstance().getPlatform().getRegionContainer().get(region.getWorld());
             if (rm != null) {
-                List<com.sk89q.worldguard.protection.regions.ProtectedRegion> regions = new ArrayList<>();
-                for (com.sk89q.worldguard.protection.regions.ProtectedRegion rg : rm.getRegions().values()) {
+                List<ProtectedRegion> regions = new ArrayList<>();
+                for (ProtectedRegion rg : rm.getRegions().values()) {
                     BlockVector3 min2 = rg.getMinimumPoint();
                     BlockVector3 max2 = rg.getMaximumPoint();
                     if (min1.x() <= max2.x() && max1.x() >= min2.x() &&
@@ -68,12 +73,12 @@ public class Arena {
                         regions.add(rg);
                     }
                 }
-                for (com.sk89q.worldguard.protection.regions.ProtectedRegion r : regions) {
-                    Map<com.sk89q.worldguard.protection.flags.Flag<?>, Object> flags = r.getFlags();
+                for (ProtectedRegion r : regions) {
+                    Map<Flag<?>, Object> flags = r.getFlags();
                     Map<String, Object> savableFlags = new HashMap<>();
-                    for (com.sk89q.worldguard.protection.flags.Flag<?> flag : flags.keySet()) {
+                    for (Flag<?> flag : flags.keySet()) {
                         Object value = flags.get(flag);
-                        if (value instanceof com.sk89q.worldguard.protection.flags.StateFlag.State state) {
+                        if (value instanceof StateFlag.State state) {
                             value = state.name();
                         }
                         savableFlags.put(flag.getName(), value);
