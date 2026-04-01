@@ -156,7 +156,7 @@ public class Arena {
                 arenas.getConfig().getConfigurationSection(name + ".regions"),
                 arenas.getConfig().getConfigurationSection(name + ".waypoints"),
                 arenas.getConfig().getConfigurationSection(name + ".gamerules"),
-                Difficulty.valueOf(arenas.getConfig().getString(name + ".difficulty")) != null ? Difficulty.valueOf(arenas.getConfig().getString(name + ".difficulty")) : Difficulty.HARD
+                Difficulty.valueOf(arenas.getConfig().getString(name + ".difficulty", "HARD"))
         );
     }
 

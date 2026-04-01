@@ -1,5 +1,5 @@
 name: ArenaCats
-version: '1.5'
+version: '1.6'
 main: hu.jgj52.arenaCats.ArenaCats
 api-version: '1.21'
 authors: [ JGJ52 ]
