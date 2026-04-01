@@ -21,6 +21,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,16 +43,18 @@ public class PlacedArena {
     private final List<ProtectedRegion> regions = new ArrayList<>();
     private final List<Waypoint> waypoints = new ArrayList<>();
     private final List<Runnable> runnables = new ArrayList<>();
-    PlacedArena(Clipboard clipboard, ConfigurationSection regions, ConfigurationSection waypoints, ConfigurationSection gamerules) {
+    private boolean inited = false;
+    PlacedArena(Clipboard clipboard, ConfigurationSection regions, ConfigurationSection waypoints, ConfigurationSection gamerules, Difficulty difficulty) {
         UUID uuid = UUID.randomUUID();
         placedArenas.put(uuid, this);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-
             copyFolder(
                     Bukkit.getWorldContainer().toPath().resolve("empty_arenacats"),
                     Bukkit.getWorldContainer().toPath().resolve(uuid + "_map_placed_arenacats")
             );
+            File file = new File(Bukkit.getWorldContainer().toPath().resolve(uuid + "_map_placed_arenacats" + File.separator + "uid.dat").toUri());
+            if (file.exists()) file.delete();
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 WorldCreator creator = new WorldCreator(uuid + "_map_placed_arenacats");
@@ -60,20 +63,21 @@ public class PlacedArena {
                 creator.type(WorldType.FLAT);
                 world = creator.createWorld();
                 if (world == null) return;
-                world.setDifficulty(Difficulty.PEACEFUL);
+                world.setDifficulty(difficulty);
                 if (gamerules != null) {
                     String ver = Bukkit.getMinecraftVersion();
                     if (ver.equals("1.21.11") || !ver.startsWith("1.")) {
                         for (String gamerule : gamerules.getKeys(false)) {
                             GameRule<?> rule = RegistryFromName.GAME_RULE(gamerule);
                             Object value = gamerules.get(gamerule);
-                            if (value == null) return;
-                            if (rule.getType() == Boolean.class) {
-                                world.setGameRule((GameRule<Boolean>) rule, Boolean.parseBoolean(value.toString()));
-                            } else if (rule.getType() == Integer.class) {
-                                world.setGameRule((GameRule<Integer>) rule, Integer.parseInt(value.toString()));
-                            } else if (rule.getType() == Double.class) {
-                                world.setGameRule((GameRule<Double>) rule, Double.parseDouble(value.toString()));
+                            if (value != null) {
+                                if (rule.getType() == Boolean.class) {
+                                    world.setGameRule((GameRule<Boolean>) rule, Boolean.parseBoolean(value.toString()));
+                                } else if (rule.getType() == Integer.class) {
+                                    world.setGameRule((GameRule<Integer>) rule, Integer.parseInt(value.toString()));
+                                } else if (rule.getType() == Double.class) {
+                                    world.setGameRule((GameRule<Double>) rule, Double.parseDouble(value.toString()));
+                                }
                             }
                         }
                     } else {
@@ -81,14 +85,14 @@ public class PlacedArena {
                             @SuppressWarnings("removal")
                             GameRule<?> rule = GameRule.getByName(gamerule);
                             Object value = gamerules.get(gamerule);
-                            if (rule == null) return;
-                            if (value == null) return;
-                            if (rule.getType() == Boolean.class) {
-                                world.setGameRule((GameRule<Boolean>) rule, Boolean.parseBoolean(value.toString()));
-                            } else if (rule.getType() == Integer.class) {
-                                world.setGameRule((GameRule<Integer>) rule, Integer.parseInt(value.toString()));
-                            } else if (rule.getType() == Double.class) {
-                                world.setGameRule((GameRule<Double>) rule, Double.parseDouble(value.toString()));
+                            if (rule != null && value != null) {
+                                if (rule.getType() == Boolean.class) {
+                                    world.setGameRule((GameRule<Boolean>) rule, Boolean.parseBoolean(value.toString()));
+                                } else if (rule.getType() == Integer.class) {
+                                    world.setGameRule((GameRule<Integer>) rule, Integer.parseInt(value.toString()));
+                                } else if (rule.getType() == Double.class) {
+                                    world.setGameRule((GameRule<Double>) rule, Double.parseDouble(value.toString()));
+                                }
                             }
                         }
                     }
@@ -110,38 +114,39 @@ public class PlacedArena {
                 if (we != null && we.isEnabled() && regions != null) {
                     RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
                     RegionManager rgs = container.get(weWorld);
-                    if (rgs == null) return;
-                    for (String name : regions.getKeys(false)) {
-                        double x1 = regions.getDouble(name + ".x1");
-                        double y1 = regions.getDouble(name + ".y1");
-                        double z1 = regions.getDouble(name + ".z1");
-                        double x2 = regions.getDouble(name + ".x2");
-                        double y2 = regions.getDouble(name + ".y2");
-                        double z2 = regions.getDouble(name + ".z2");
-                        ConfigurationSection flagsSection = regions.getConfigurationSection(name + ".flags");
-                        Map<StateFlag, StateFlag.State> flags = new HashMap<>();
-                        if (flagsSection != null) {
-                            for (String n : flagsSection.getKeys(false)) {
-                                if (!(WorldGuard.getInstance().getFlagRegistry().get(n.toLowerCase()) instanceof StateFlag flag))
-                                    continue;
-                                StateFlag.State state = StateFlag.State.valueOf(flagsSection.getString(n));
-                                flags.put(flag, state);
+                    if (rgs != null) {
+                        for (String name : regions.getKeys(false)) {
+                            double x1 = regions.getDouble(name + ".x1");
+                            double y1 = regions.getDouble(name + ".y1");
+                            double z1 = regions.getDouble(name + ".z1");
+                            double x2 = regions.getDouble(name + ".x2");
+                            double y2 = regions.getDouble(name + ".y2");
+                            double z2 = regions.getDouble(name + ".z2");
+                            ConfigurationSection flagsSection = regions.getConfigurationSection(name + ".flags");
+                            Map<StateFlag, StateFlag.State> flags = new HashMap<>();
+                            if (flagsSection != null) {
+                                for (String n : flagsSection.getKeys(false)) {
+                                    if (!(WorldGuard.getInstance().getFlagRegistry().get(n.toLowerCase()) instanceof StateFlag flag))
+                                        continue;
+                                    StateFlag.State state = StateFlag.State.valueOf(flagsSection.getString(n));
+                                    flags.put(flag, state);
+                                }
                             }
+                            BlockVector3 min = BlockVector3.at(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2));
+                            BlockVector3 max = BlockVector3.at(Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
+                            ProtectedRegion region = new ProtectedCuboidRegion(name, min, max);
+                            if (regions.get(name + ".priority") != null) {
+                                region.setPriority(regions.getInt(name + ".priority"));
+                            }
+                            flags.forEach(region::setFlag);
+                            rgs.addRegion(region);
+                            this.regions.add(region);
                         }
-                        BlockVector3 min = BlockVector3.at(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2));
-                        BlockVector3 max = BlockVector3.at(Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
-                        ProtectedRegion region = new ProtectedCuboidRegion(name, min, max);
-                        if (regions.get(name + ".priority") != null) {
-                            region.setPriority(regions.getInt(name + ".priority"));
+                        try {
+                            rgs.save();
+                        } catch (StorageException e) {
+                            throw new RuntimeException(e);
                         }
-                        flags.forEach(region::setFlag);
-                        rgs.addRegion(region);
-                        this.regions.add(region);
-                    }
-                    try {
-                        rgs.save();
-                    } catch (StorageException e) {
-                        throw new RuntimeException(e);
                     }
                 }
                 if (waypoints != null) {
@@ -158,6 +163,7 @@ public class PlacedArena {
                         this.waypoints.add(waypoint);
                     }
                 }
+                inited = true;
                 for (Runnable runnable : runnables) {
                     runnable.run();
                 }
@@ -167,7 +173,11 @@ public class PlacedArena {
     }
 
     public void onInit(Runnable runnable) {
-        runnables.add(runnable);
+        if (inited) {
+            runnable.run();
+        } else {
+            runnables.add(runnable);
+        }
     }
 
     private static void copyFolder(Path src, Path dest) {

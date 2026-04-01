@@ -15,6 +15,7 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
 import org.bukkit.GameRule;
 import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
@@ -121,6 +122,7 @@ public class Arena {
             }
         }
         arena.set("gamerules", gamerules);
+        arena.set("difficulty", editor.getWorld().getDifficulty().name());
         arenas.saveConfig();
         arenas.reloadConfig();
         editor.delete();
@@ -153,7 +155,8 @@ public class Arena {
                 clipboard,
                 arenas.getConfig().getConfigurationSection(name + ".regions"),
                 arenas.getConfig().getConfigurationSection(name + ".waypoints"),
-                arenas.getConfig().getConfigurationSection(name + ".gamerules")
+                arenas.getConfig().getConfigurationSection(name + ".gamerules"),
+                Difficulty.valueOf(arenas.getConfig().getString(name + ".difficulty")) != null ? Difficulty.valueOf(arenas.getConfig().getString(name + ".difficulty")) : Difficulty.HARD
         );
     }
 
