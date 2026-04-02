@@ -31,7 +31,7 @@ public class Place extends SubCommand {
             return true;
         }
         PlacedArena placed = arena.place();
-        placed.teleportToCenter(player);
+        placed.onInit(() -> placed.teleportToCenter(player));
         return true;
     }
 
